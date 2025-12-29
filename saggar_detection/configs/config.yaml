@@ -1,0 +1,39 @@
+# Saggar Detection Configuration
+
+model:
+  num_classes: 2  # Background + Saggar
+  backbone: resnet50_fpn
+  pretrained: true
+
+detection:
+  confidence_threshold: 0.5
+  nms_threshold: 0.5
+
+layer_analysis:
+  vertical_tolerance: 20  # pixels
+  horizontal_tolerance: 30  # pixels
+
+image_processing:
+  max_size: 1024
+  enhance_image: false
+
+training:
+  batch_size: 2
+  num_epochs: 50
+  learning_rate: 0.005
+  momentum: 0.9
+  weight_decay: 0.0005
+  lr_scheduler: step
+  lr_step_size: 10
+  lr_gamma: 0.1
+
+data:
+  train_dir: ./data/train
+  val_dir: ./data/val
+  test_dir: ./data/test
+  annotation_format: coco  # coco or voc
+
+output:
+  output_dir: ./output
+  save_visualizations: true
+  save_masks: true
