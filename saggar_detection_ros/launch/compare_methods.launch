@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Arguments -->
+  <arg name="bag_file" default="" />
+  <arg name="image_topic" default="/camera/image_raw" />
+  <arg name="model_path" default="" />
+
+  <!-- Bag Player Node -->
+  <node name="bag_player" pkg="saggar_detection_ros" type="bag_player_node.py" output="screen">
+    <param name="bag_file" value="$(arg bag_file)" />
+    <param name="image_topic" value="$(arg image_topic)" />
+    <param name="output_topic" value="/saggar/image_raw" />
+    <param name="loop" value="true" />
+    <param name="rate" value="5.0" />
+  </node>
+
+  <!-- Mask R-CNN Detector -->
+  <node name="maskrcnn_detector" pkg="saggar_detection_ros" type="maskrcnn_detector_node.py" output="screen" ns="maskrcnn">
+    <param name="model_path" value="$(arg model_path)" />
+    <param name="confidence_threshold" value="0.5" />
+    <param name="device" value="cuda" />
+    <param name="vertical_tolerance" value="20" />
+    <param name="horizontal_tolerance" value="30" />
+    <param name="publish_visualization" value="true" />
+    <param name="input_topic" value="/saggar/image_raw" />
+    <param name="output_topic" value="/saggar/detections/maskrcnn" />
+    <param name="viz_topic" value="/saggar/visualization/maskrcnn" />
+  </node>
+
+  <!-- Edge Detector -->
+  <node name="edge_detector" pkg="saggar_detection_ros" type="edge_detector_node.py" output="screen" ns="edge">
+    <param name="canny_low" value="50" />
+    <param name="canny_high" value="150" />
+    <param name="min_contour_area" value="500" />
+    <param name="max_contour_area" value="50000" />
+    <param name="vertical_tolerance" value="20" />
+    <param name="horizontal_tolerance" value="30" />
+    <param name="publish_visualization" value="true" />
+    <param name="input_topic" value="/saggar/image_raw" />
+    <param name="output_topic" value="/saggar/detections/edge" />
+    <param name="viz_topic" value="/saggar/visualization/edge" />
+  </node>
+
+  <!-- Visualization for Mask R-CNN -->
+  <node name="visualization_maskrcnn" pkg="saggar_detection_ros" type="visualization_node.py" output="screen" ns="maskrcnn">
+    <param name="input_topic" value="/saggar/detections/maskrcnn" />
+    <param name="marker_topic" value="/saggar/markers/maskrcnn" />
+    <param name="text_topic" value="/saggar/text_markers/maskrcnn" />
+    <param name="contour_topic" value="/saggar/contour_markers/maskrcnn" />
+    <param name="frame_id" value="camera_frame" />
+  </node>
+
+  <!-- Visualization for Edge Detection -->
+  <node name="visualization_edge" pkg="saggar_detection_ros" type="visualization_node.py" output="screen" ns="edge">
+    <param name="input_topic" value="/saggar/detections/edge" />
+    <param name="marker_topic" value="/saggar/markers/edge" />
+    <param name="text_topic" value="/saggar/text_markers/edge" />
+    <param name="contour_topic" value="/saggar/contour_markers/edge" />
+    <param name="frame_id" value="camera_frame" />
+  </node>
+
+  <!-- RViz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find saggar_detection_ros)/rviz/saggar_detection.rviz" />
+
+  <!-- rqt_image_view for comparison -->
+  <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" />
+
+</launch>

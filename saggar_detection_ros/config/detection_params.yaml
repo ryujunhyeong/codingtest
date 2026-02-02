@@ -1,0 +1,35 @@
+# Saggar Detection ROS Parameters
+
+# Bag Player Parameters
+bag_player:
+  loop: true
+  rate: 10.0  # Hz
+  start_time: 0.0  # seconds
+  end_time: -1.0  # -1 means until end
+
+# Mask R-CNN Parameters
+maskrcnn:
+  confidence_threshold: 0.5
+  device: "cuda"  # or "cpu"
+  vertical_tolerance: 20  # pixels
+  horizontal_tolerance: 30  # pixels
+  publish_visualization: true
+
+# Edge Detection Parameters
+edge_detection:
+  canny_low: 50
+  canny_high: 150
+  blur_kernel: 5
+  min_contour_area: 500
+  max_contour_area: 50000
+  vertical_tolerance: 20
+  horizontal_tolerance: 30
+  morph_kernel_size: 3
+  use_adaptive_threshold: false
+  publish_visualization: true
+
+# Visualization Parameters
+visualization:
+  frame_id: "camera_frame"
+  marker_scale: 0.1
+  z_offset: 0.05  # Z offset per layer for 3D visualization

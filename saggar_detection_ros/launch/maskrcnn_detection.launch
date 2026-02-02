@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Arguments -->
+  <arg name="bag_file" default="" />
+  <arg name="image_topic" default="/camera/image_raw" />
+  <arg name="model_path" default="" />
+  <arg name="confidence_threshold" default="0.5" />
+  <arg name="device" default="cuda" />
+  <arg name="use_bag_player" default="true" />
+  <arg name="use_visualization" default="true" />
+
+  <!-- Bag Player Node (optional) -->
+  <group if="$(arg use_bag_player)">
+    <node name="bag_player" pkg="saggar_detection_ros" type="bag_player_node.py" output="screen">
+      <param name="bag_file" value="$(arg bag_file)" />
+      <param name="image_topic" value="$(arg image_topic)" />
+      <param name="output_topic" value="/saggar/image_raw" />
+      <param name="loop" value="true" />
+      <param name="rate" value="10.0" />
+    </node>
+  </group>
+
+  <!-- Mask R-CNN Detector Node -->
+  <node name="maskrcnn_detector" pkg="saggar_detection_ros" type="maskrcnn_detector_node.py" output="screen">
+    <param name="model_path" value="$(arg model_path)" />
+    <param name="confidence_threshold" value="$(arg confidence_threshold)" />
+    <param name="device" value="$(arg device)" />
+    <param name="vertical_tolerance" value="20" />
+    <param name="horizontal_tolerance" value="30" />
+    <param name="publish_visualization" value="true" />
+    <param name="input_topic" value="/saggar/image_raw" />
+    <param name="output_topic" value="/saggar/detections/maskrcnn" />
+    <param name="viz_topic" value="/saggar/visualization/maskrcnn" />
+  </node>
+
+  <!-- Visualization Node (optional) -->
+  <group if="$(arg use_visualization)">
+    <node name="visualization" pkg="saggar_detection_ros" type="visualization_node.py" output="screen">
+      <param name="input_topic" value="/saggar/detections/maskrcnn" />
+      <param name="marker_topic" value="/saggar/markers" />
+      <param name="text_topic" value="/saggar/text_markers" />
+      <param name="contour_topic" value="/saggar/contour_markers" />
+      <param name="frame_id" value="camera_frame" />
+    </node>
+  </group>
+
+  <!-- RViz -->
+  <group if="$(arg use_visualization)">
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find saggar_detection_ros)/rviz/saggar_detection.rviz" />
+  </group>
+
+</launch>
